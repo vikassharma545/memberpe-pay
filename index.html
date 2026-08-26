@@ -179,35 +179,37 @@
   // that the user did not initiate, and an auto-redirect that silently fails
   // leaves a blank page with no way forward.
 
-  // --- Telegram Mini App support ----------------------------------------
-  // Opened from a web_app button, this page runs inside Telegram's own webview
-  // (which avoids Telegram's "Open Link" confirmation). That webview may or may
-  // not hand a upi:// link to the UPI app depending on the client build, so
-  // offer a one-tap escape to the real browser, where the handoff is proven.
+  // --- Telegram Mini App -------------------------------------------------
+  // Telegram's in-app webview cannot open upi:// at all - it fails the whole
+  // view with net::ERR_UNKNOWN_URL_SCHEME (confirmed on Android). So inside a
+  // Mini App the pay button must NOT point at upi://; it has to bounce out to
+  // a real browser first, which is the only place the handoff works.
   var tg = window.Telegram && window.Telegram.WebApp;
-  if (tg) {
+  var inTelegram = !!(tg && tg.initData !== undefined && tg.platform !== 'unknown');
+
+  if (inTelegram) {
     try {
       tg.ready();
       tg.expand();
     } catch (e) {}
 
-    var external = document.getElementById('openExternal');
-    external.addEventListener('click', function (ev) {
-      ev.preventDefault();
+    var openExternally = function (ev) {
+      if (ev) ev.preventDefault();
       try {
-        tg.openLink(location.href, { try_instant_view: false });
+        tg.openLink(location.href);          // opens this page in the browser
       } catch (e) {
         window.open(location.href, '_blank');
       }
-    });
+    };
 
-    // Only surface the fallback once they have actually tried paying, so the
-    // happy path stays uncluttered.
-    payBtn.addEventListener('click', function () {
-      setTimeout(function () {
-        document.getElementById('browserFallback').style.display = 'block';
-      }, 1200);
-    });
+    // Repoint the primary button: opening the browser is the working path.
+    payBtn.setAttribute('href', '#');
+    payBtn.textContent = 'Continue to pay';
+    payBtn.addEventListener('click', openExternally);
+    document.getElementById('payHint').textContent =
+      'Opens in your browser, then hands off to your UPI app.';
+
+    document.getElementById('openExternal').addEventListener('click', openExternally);
   }
 
   var btn = document.getElementById('copyBtn');
