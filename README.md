@@ -61,7 +61,13 @@ instead. That needs no hosting and works everywhere — it is just more taps.
   forward. The payer taps a button.
 - Always shows the UPI ID with a copy button, so the manual route survives even
   if the handoff fails on some device.
-- No tracking, no external requests, no dependencies. Works offline once loaded.
+- No tracking. The only external request is Telegram's Mini App SDK
+  (`telegram-web-app.js`), used to detect when the page is opened inside
+  Telegram and bounce out to a real browser; the page works without it.
+- **Cannot verify who made the link.** The parameters are unsigned, so a
+  phisher can craft a MemberPe-looking link paying their own UPI ID. The page
+  therefore tells the payer to compare the UPI ID with the one in their
+  Telegram message from the bot, which is the only trustworthy source.
 
 ## Privacy note
 
