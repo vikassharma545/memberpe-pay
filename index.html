@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Pay with UPI · MemberPe</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --ink: #10243e;
+    --muted: #5b6b81;
+    --line: #e3e8f0;
+    --brand: #1668e3;
+    --brand-2: #16a97a;
+    --shadow: 0 10px 30px rgba(16, 36, 62, .10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1621; --card: #17212b; --ink: #eaf1f9;
+      --muted: #9bb0c6; --line: #24313f;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; min-height: 100vh; padding: 24px 16px 40px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg); color: var(--ink);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  .card {
+    width: 100%; max-width: 420px; background: var(--card);
+    border: 1px solid var(--line); border-radius: 18px;
+    box-shadow: var(--shadow); padding: 26px 22px 22px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 9px;
+    font-weight: 700; letter-spacing: -.2px; margin-bottom: 22px;
+  }
+  .brand .dot {
+    width: 26px; height: 26px; border-radius: 8px; flex: none;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  }
+  .amount { font-size: 40px; font-weight: 800; letter-spacing: -1px; margin: 0; }
+  .to { color: var(--muted); font-size: 14px; margin: 4px 0 20px; }
+  .to b { color: var(--ink); font-weight: 600; }
+
+  .rows { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+  .row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 14px; border-bottom: 1px solid var(--line);
+  }
+  .row:last-child { border-bottom: 0; }
+  .row .k { color: var(--muted); font-size: 13px; flex: none; }
+  .row .v { font-weight: 600; font-size: 14px; text-align: right; word-break: break-all; }
+
+  .pay {
+    display: block; width: 100%; padding: 16px 18px; border: 0; border-radius: 12px;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: #fff; font-size: 17px; font-weight: 700; text-align: center;
+    text-decoration: none; cursor: pointer;
+  }
+  .pay:active { transform: translateY(1px); }
+  .hint { color: var(--muted); font-size: 13px; text-align: center; margin: 14px 0 0; }
+
+  .copy {
+    margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line);
+  }
+  .copy h2 { font-size: 13px; color: var(--muted); font-weight: 600; margin: 0 0 8px; }
+  .copybox {
+    display: flex; gap: 8px; align-items: stretch;
+  }
+  .copybox code {
+    flex: 1; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--bg); font-size: 14px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    word-break: break-all; display: flex; align-items: center;
+  }
+  .copybox button {
+    flex: none; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--card); color: var(--ink); font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .steps { color: var(--muted); font-size: 13px; margin: 12px 0 0; padding-left: 18px; }
+  .steps li { margin: 3px 0; }
+  .err { display: none; padding: 14px; border-radius: 12px; background: #fdecec; color: #9b1c1c; font-size: 14px; }
+  @media (prefers-color-scheme: dark) { .err { background: #3a1e1e; color: #ffb4b4; } }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand"><span class="dot"></span> MemberPe</div>
+
+  <div id="ok">
+    <p class="amount" id="amount">—</p>
+    <p class="to">to <b id="payee">—</b></p>
+
+    <div class="rows">
+      <div class="row"><span class="k">UPI ID</span><span class="v" id="vpa">—</span></div>
+      <div class="row"><span class="k">Reference</span><span class="v" id="note">—</span></div>
+    </div>
+
+    <a class="pay" id="payBtn" href="#">Pay with UPI app</a>
+    <p class="hint">Opens GPay, PhonePe, Paytm or any UPI app on your phone.</p>
+
+    <div class="copy">
+      <h2>Or pay manually</h2>
+      <div class="copybox">
+        <code id="vpa2">—</code>
+        <button id="copyBtn" type="button">Copy</button>
+      </div>
+      <ol class="steps">
+        <li>Copy the UPI ID above</li>
+        <li>Open any UPI app and paste it as the payee</li>
+        <li>Send exactly <b id="amount2">—</b></li>
+      </ol>
+    </div>
+
+    <p class="hint" style="margin-top:18px">
+      After paying, go back to Telegram and send the <b>12-digit UTR</b>
+      from your payment app.
+    </p>
+  </div>
+
+  <div class="err" id="err">
+    This payment link is incomplete or has expired. Please go back to Telegram
+    and tap your plan again to get a fresh link.
+  </div>
+</div>
+
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var pa = q.get('pa') || '';
+  var pn = q.get('pn') || 'Payee';
+  var am = q.get('am') || '';
+  var tn = q.get('tn') || '';
+
+  // A malformed link must fail visibly rather than open a UPI app with wrong
+  // details - a wrong payee or amount means the payer loses real money.
+  var validVpa = /^[A-Za-z0-9._\-]{2,256}@[A-Za-z][A-Za-z0-9]{1,63}$/.test(pa);
+  var validAmt = /^\d+(\.\d{1,2})?$/.test(am) && parseFloat(am) > 0;
+
+  if (!validVpa || !validAmt) {
+    document.getElementById('ok').style.display = 'none';
+    document.getElementById('err').style.display = 'block';
+    return;
+  }
+
+  var rupees = '₹' + parseFloat(am).toLocaleString('en-IN', {
+    minimumFractionDigits: am.indexOf('.') > -1 && !/\.00$/.test(am) ? 2 : 0,
+    maximumFractionDigits: 2
+  });
+
+  document.getElementById('amount').textContent = rupees;
+  document.getElementById('amount2').textContent = rupees;
+  document.getElementById('payee').textContent = pn;
+  document.getElementById('vpa').textContent = pa;
+  document.getElementById('vpa2').textContent = pa;
+  document.getElementById('note').textContent = tn || '—';
+  document.title = 'Pay ' + rupees + ' · MemberPe';
+
+  // Rebuild the upi:// URI here rather than accepting one from the query
+  // string, so a crafted link cannot smuggle in extra UPI parameters.
+  var upi = 'upi://pay?pa=' + encodeURIComponent(pa) +
+            '&pn=' + encodeURIComponent(pn) +
+            '&am=' + encodeURIComponent(parseFloat(am).toFixed(2)) +
+            '&cu=INR' +
+            (tn ? '&tn=' + encodeURIComponent(tn) : '');
+  document.getElementById('payBtn').setAttribute('href', upi);
+
+  // Deliberately NOT auto-redirecting: mobile browsers block scheme handoffs
+  // that the user did not initiate, and an auto-redirect that silently fails
+  // leaves a blank page with no way forward.
+
+  var btn = document.getElementById('copyBtn');
+  btn.addEventListener('click', function () {
+    var done = function () {
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = 'Copy'; }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(pa).then(done, fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      var t = document.createElement('textarea');
+      t.value = pa; t.setAttribute('readonly', '');
+      t.style.position = 'absolute'; t.style.left = '-9999px';
+      document.body.appendChild(t); t.select();
+      try { document.execCommand('copy'); done(); } catch (e) {}
+      document.body.removeChild(t);
+    }
+  });
+})();
+</script>
+</body>
+</html>
