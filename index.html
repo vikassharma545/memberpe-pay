@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Pay with UPI · MemberPe</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   :root {
     --bg: #f4f6fb;
@@ -101,7 +102,11 @@
     </div>
 
     <a class="pay" id="payBtn" href="#">Pay with UPI app</a>
-    <p class="hint">Opens GPay, PhonePe, Paytm or any UPI app on your phone.</p>
+    <p class="hint" id="payHint">Opens GPay, PhonePe, Paytm or any UPI app on your phone.</p>
+    <p class="hint" id="browserFallback" style="display:none">
+      Nothing happened? <a href="#" id="openExternal"><b>Open in your browser</b></a>
+      and tap Pay again.
+    </p>
 
     <div class="copy">
       <h2>Or pay manually</h2>
@@ -167,11 +172,43 @@
             '&am=' + encodeURIComponent(parseFloat(am).toFixed(2)) +
             '&cu=INR' +
             (tn ? '&tn=' + encodeURIComponent(tn) : '');
-  document.getElementById('payBtn').setAttribute('href', upi);
+  var payBtn = document.getElementById('payBtn');
+  payBtn.setAttribute('href', upi);
 
   // Deliberately NOT auto-redirecting: mobile browsers block scheme handoffs
   // that the user did not initiate, and an auto-redirect that silently fails
   // leaves a blank page with no way forward.
+
+  // --- Telegram Mini App support ----------------------------------------
+  // Opened from a web_app button, this page runs inside Telegram's own webview
+  // (which avoids Telegram's "Open Link" confirmation). That webview may or may
+  // not hand a upi:// link to the UPI app depending on the client build, so
+  // offer a one-tap escape to the real browser, where the handoff is proven.
+  var tg = window.Telegram && window.Telegram.WebApp;
+  if (tg) {
+    try {
+      tg.ready();
+      tg.expand();
+    } catch (e) {}
+
+    var external = document.getElementById('openExternal');
+    external.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      try {
+        tg.openLink(location.href, { try_instant_view: false });
+      } catch (e) {
+        window.open(location.href, '_blank');
+      }
+    });
+
+    // Only surface the fallback once they have actually tried paying, so the
+    // happy path stays uncluttered.
+    payBtn.addEventListener('click', function () {
+      setTimeout(function () {
+        document.getElementById('browserFallback').style.display = 'block';
+      }, 1200);
+    });
+  }
 
   var btn = document.getElementById('copyBtn');
   btn.addEventListener('click', function () {
