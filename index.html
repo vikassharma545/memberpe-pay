@@ -172,7 +172,19 @@
 
   // Rebuild the upi:// URI here rather than accepting one from the query
   // string, so a crafted link cannot smuggle in extra UPI parameters.
-  var upi = 'upi://pay?pa=' + encodeURIComponent(pa) +
+  //
+  // The "@" in the VPA must stay literal. encodeURIComponent turns it into
+  // %40, and a UPI app decodes that for display and for resolving the payee's
+  // name - so the payment screen looks perfectly correct - but sends the
+  // still-encoded address in the debit request, and the bank declines it.
+  // Scanning the QR from the same Telegram message worked throughout, because
+  // the QR carries the URI the bot built, where "@" is left alone.
+  // Every other character a valid VPA can contain (validated above: letters,
+  // digits, dot, underscore, hyphen) is already URI-safe, so restoring "@" is
+  // the only exemption needed - and the regex gate above is what makes it safe.
+  var encodeVpa = function (v) { return encodeURIComponent(v).replace(/%40/g, '@'); };
+
+  var upi = 'upi://pay?pa=' + encodeVpa(pa) +
             '&pn=' + encodeURIComponent(pn) +
             '&am=' + encodeURIComponent(parseFloat(am).toFixed(2)) +
             '&cu=INR' +
